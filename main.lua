@@ -33,6 +33,8 @@ local spawnTimer = 0
 
 local lastY = -PIPE_HEIGHT + math.random(80) + 20
 
+local isScrolling = true
+
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
@@ -73,6 +75,7 @@ function love.keyboard.wasPressed(key)
 end
 
 function love.update(dt)
+if isScrolling then
     backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt)
     % BACKGROUND_LOOPING_POINT
 
@@ -98,6 +101,18 @@ function love.update(dt)
 
     for k, pair in pairs(pipePairs) do
         pair:update(dt)
+
+        -- check to see if bird collided with pipe
+        for l, pipe in pairs(pair.pipes) do
+            if bird:collides(pipe) then
+                -- pause the game to show collision
+                isScrolling = false
+            end
+        end
+        -- remove the pipe if it's no longer visible past left edge
+        if pair.x < -PIPE_WIDTH then
+            pair.remove = true
+        end
     end
     
 
@@ -111,6 +126,7 @@ function love.update(dt)
             table.remove(pipePairs, k)
         end
     end
+end
 
     love.keyboard.keysPressed = {}
 end
