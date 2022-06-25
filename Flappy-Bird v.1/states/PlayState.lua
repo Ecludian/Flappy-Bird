@@ -18,6 +18,9 @@ function PlayState:init()
     self.pipePairs = {}
     self.timer = 0
 
+    -- keep track of our score
+    self.score = 0
+
     self.lastY = -PIPE_HEIGHT + math.random(80) + 20
 end
 
@@ -31,9 +34,9 @@ function PlayState:update(dt)
         local y = math.max(-PIPE_HEIGHT + 10, 
         math.min(self.lastY + math.random(-20, 20),V_HEIGHT - 90 - PIPE_HEIGHT))
         self.lastY = y
-        
-
+        -- add a new pipe pair at the end of th escreen at our new Y
         table.insert(self.pipePairs, PipePairs(y))
+        -- reset timer
         self.timer = 0
     end 
 
@@ -42,6 +45,15 @@ function PlayState:update(dt)
     
     -- for every pair of pipess..
     for k, pair in pairs(self.pipePairs) do
+        -- score a point if the pipe has gone past the bird to the left
+        -- be sure to ignore it if it's already been scored
+        if not pair.scored then
+            if pair.x + PIPE_WIDTH < self.bird.x then
+                self.score = self.score + 1
+                pair.scored = true
+            end
+        end
+
         -- update position of pair
         pair:update(dt)
 
@@ -49,7 +61,7 @@ function PlayState:update(dt)
         for l, pipe in pairs(pair.pipes) do
             if self.bird:collides(pipe) then
                 -- pause the game to show collision
-                gStateMachine:change('title')
+                gStateMachine:change('score', {score = self.score})
             end
         end
         -- remove the pipe if it's no longer visible past left edge
@@ -71,7 +83,7 @@ function PlayState:update(dt)
     
     -- reset if we get to the ground
     if self.bird.y > V_HEIGHT - 15 then
-        gStateMachine:change('title')
+        gStateMachine:change('score', {score = self.score})
     end
 end
 
@@ -80,5 +92,7 @@ function PlayState:render()
     for k, pair in pairs(self.pipePairs) do
         pair:render()
     end
+    love.graphics.setFont(flappyFont)
+    love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
     self.bird:render()
 end

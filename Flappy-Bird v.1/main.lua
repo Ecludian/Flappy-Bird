@@ -11,6 +11,7 @@ require "PipePairs"
 require 'StateMachine'
 require 'states/BaseState'
 require 'states/PlayState'
+require 'states/ScoreState'
 require 'states/TitleScreenState'
 
 WINDOW_WIDTH = 1280
@@ -30,14 +31,6 @@ local GROUND_SCROLL_SPEED = 60
 
 local BACKGROUND_LOOPING_POINT = 413
 
-local bird = Bird()
-
-local pipePairs = {}
-
-local spawnTimer = 0
-
-
-
 local isScrolling = true
 
 function love.load()
@@ -47,7 +40,7 @@ function love.load()
 
     -- font init
     smallFont = love.graphics.newFont('font.ttf', 8)
-    mediutmFont = love.graphics.newFont('flappy.ttf', 14)
+    mediumFont = love.graphics.newFont('flappy.ttf', 14)
     flappyFont = love.graphics.newFont('flappy.ttf', 28)
     hugeFont = love.graphics.newFont('flappy.ttf', 56)
     love.graphics.setFont(flappyFont)
@@ -64,6 +57,7 @@ function love.load()
     gStateMachine = StateMachine {
         ['title'] = function() return TitleScreenState()end,
         ['play'] = function() return PlayState() end,
+        ['score'] = function() return ScoreState() end
     }  
     gStateMachine:change('title') 
 
